@@ -29,3 +29,18 @@ class DBStorage:
         self.__session = scoped_session(sessionmaker(bind=self.__engine,
                                                      expire_on_commit=False))
 
+    def all(self, cls=None):
+        from models import classes  # Import all classes here
+        objects = {}
+        if cls:
+            query = self.__session.query(classes[cls]).all()
+        else:
+            query = []
+            for cls in classes.values():
+                query += self.__session.query(cls).all()
+
+        for obj in query:
+            key = "{}.{}".format(type(obj).__name__, obj.id)
+            objects[key] = obj
+
+        return objects
