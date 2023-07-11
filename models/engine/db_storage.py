@@ -4,6 +4,7 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from models.base_model import Base
+from models import classes
 
 
 class DBStorage:
@@ -30,7 +31,12 @@ class DBStorage:
                                                      expire_on_commit=False))
 
     def all(self, cls=None):
-        from models import classes  # Import all classes here
+        """
+        querying on the current database session
+        on all objects depending of the class name
+        querying all types of objects
+        returning a dictionary
+        """
         objects = {}
         if cls:
             query = self.__session.query(classes[cls]).all()
@@ -44,3 +50,27 @@ class DBStorage:
             objects[key] = obj
 
         return objects
+
+    def new(self, obj):
+        """ adding the object to the current database session """
+        self.__session.add(obj)
+
+    def save(self):
+        """ commiting all changes of the current database session """
+        self.__session.commit()
+
+    def delete(self, obj=None):
+        """ deleting from the current database session """
+        if obj:
+            self.__session.delete(obj)
+
+    def reload(self):
+        """
+        creating all tables in the database
+        and creating the current database session
+        from the engine
+        """
+        Base.metadata.create_all(self.__engine)
+        session_factory = sessionmaker(bind=self.__engine,
+                                       expire_on_commit=False)
+        self.__session = scoped_session(session_factory)
