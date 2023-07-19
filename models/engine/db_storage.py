@@ -4,7 +4,8 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from models.base_model import Base
-from models import classes
+from models.state import State
+from models.city import City
 
 
 class DBStorage:
@@ -37,6 +38,7 @@ class DBStorage:
         querying all types of objects
         returning a dictionary
         """
+        from models import classes
         objects = {}
         if cls:
             query = self.__session.query(classes[cls]).all()
