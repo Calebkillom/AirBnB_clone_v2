@@ -3,6 +3,7 @@
 from models.base_model import BaseModel
 from models.user import User
 from models.state import State
+from models.place import Place
 from models.city import City
 from os import getenv
 
@@ -13,5 +14,5 @@ else:
     from models.engine.file_storage import FileStorage
     storage = FileStorage()
 classes = {"User": User, "BaseModel": BaseModel,
-           "State": State, "City": City}
+           "State": State, "City": City, "Place": Place}
 storage.reload()
