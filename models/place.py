@@ -78,4 +78,4 @@ class Place(BaseModel, Base):
         for adding an Amenity.id to the attribute amenity_ids
         """
         if type(value) == Amenity:
-                self.amenity_ids.append(value.id)
+            self.amenity_ids.append(value.id)
