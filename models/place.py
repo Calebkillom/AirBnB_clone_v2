@@ -3,8 +3,9 @@
 from os import getenv
 from models.review import Review
 from models.base_model import BaseModel, Base
-from sqlalchemy import Column, String, Integer, Float, ForeignKey
+from sqlalchemy import Column, String, Integer, Float, ForeignKey, Table
 from sqlalchemy.orm import relationship
+from models.amenity import Amenity, place_amenity
 import models
 
 
@@ -26,6 +27,10 @@ class Place(BaseModel, Base):
         longitude = Column(Float, nullable=True)
         reviews = relationship("Review", backref="place",
                                cascade="all, delete, delete-orphan")
+        amenities = relationship('Amenity', secondary=place_amenity,
+                                 back_populates='place_amenities',
+                                 viewonly=False)
+        amenity_ids = []
     else:
         city_id = ""
         user_id = ""
@@ -41,14 +46,36 @@ class Place(BaseModel, Base):
 
     @property
     def reviews(self):
-            """
-            Getter attribute to return the list of Review instances
-            with place_id equals to the current Place.id
-            """
-            review_list = []
+        """
+        Getter attribute to return the list of Review instances
+        with place_id equals to the current Place.id
+        """
+        review_list = []
 
-            for review in models.storage.all(Review).values():
-                if review.place_id == self.id:
-                    review_list.append(review)
+        for review in models.storage.all(Review).values():
+            if review.place_id == self.id:
+                review_list.append(review)
 
-            return review_list
+        return review_list
+
+    @property
+    def amenities(self):
+        """
+        returns the list of Amenity instances
+        based on the attribute amenity_ids
+        """
+        amenity_list = []
+        for amenity_id in self.amenity_ids:
+            amenity = models.storage.get(Amenity, amenity_id)
+            if amenity is not None:
+                amenity_list.append(amenity)
+        return amenity_list
+
+    @amenities.setter
+    def amenities(self, value):
+        """
+        amenities that handles append method
+        for adding an Amenity.id to the attribute amenity_ids
+        """
+        if type(value) == Amenity:
+                self.amenity_ids.append(value.id)
