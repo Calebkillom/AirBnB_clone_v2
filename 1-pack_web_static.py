@@ -7,7 +7,12 @@ import tarfile
 import os
 from datetime import datetime
 
+
 def do_pack():
+    """
+    returns the archive path
+    if the archive has been correctly generated
+    """
     folder_to_compress = "web_static"
     versions = "versions"
 
@@ -22,4 +27,3 @@ def do_pack():
         local(f"tar -czvf ../{archive_path} .")
 
     return archive_path if os.path.exists(archive_path) else None
-
