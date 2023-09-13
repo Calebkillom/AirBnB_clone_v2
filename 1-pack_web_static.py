@@ -1,36 +1,37 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 # Fabric script that generates a .tgz archive
-# from the contents of the web_static folder of my AirBnB Clone repo
+# from the contents of the web_static folder of my AirBnB Clone repo 
 
 from fabric.api import local, lcd
+import tarfile
+import os
 from datetime import datetime
 
 
 def do_pack():
-    #  returning the archive path if the archive has been correctly generated
-    # Create the versions folder if it doesn't exist
-    local("mkdir -p versions")
+    # Local path to the folder you want to compress (web_static folder)
+    folder_to_compress = "web_static"
 
-    # Generate the timestamp
-    current_time = datetime.now().strftime("%Y%m%d%H%M%S")
+    # Create the "versions" folder if it doesn't exist
+    versions = "versions"
+    if not os.path.exists(versions):
+        os.makedirs(versions)
 
-    # Create the archive filename
-    archive_name = "web_static_{}.tgz".format(current_time)
+    # Get the current date and time
+    current_datetime = datetime.now()
 
-    """
-    Changing the local working directory to
-    web_static before creating the archive
-    """
-    with lcd("web_static"):
-        # Create the command to generate the archive
-        command = "tar -czvf ../versions/{} .".format(archive_name)
+    # Create the archive filename based on the current date and time
+    archive_filename = current_datetime.strftime("web_static_%Y%m%d%H%M%S.tgz")
 
-        # Run the command and capture the output
-        result = local(command)
+    # Create a .tar archive within the "versions" folder
+    archive_path = os.path.join(versions, archive_filename)
 
-    # Check if the command was successful
-    if result.failed:
+    # Create a .tar archive
+    with lcd(folder_to_compress):
+        local("tar -czvf ../" + archive_path + " .")
+
+    # Check if the archive file exists
+    if os.path.exists(archive_path):
+        return archive_path
+    else:
         return None
-
-    # Return the path to the archive file
-    return "versions/{}".format(archive_name)
