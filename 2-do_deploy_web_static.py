@@ -24,32 +24,29 @@ def do_deploy(archive_path):
         return False
 
     try:
-        # Getting the base name of the archive without the file extension
+        # Getting the base name of the archive
         archive_name = os.path.basename(archive_path)
 
-        # Upload the archive to the remote server's /tmp/ directory
-        put(archive_path, "/tmp/{}".format(archive_name))
+        # Uploading the archive to the remote server's /tmp/ directory
+        put(archive_path, "/tmp/{}.tgz".format(archive_name))
 
-        # Extract the archive to the desired folder
-        release_path = "/data/web_static/releases/{}/".format(archive_name)
-        run("mkdir -p {}".format(release_path))
-        run("tar -xzf /tmp/{}.tgz -C {}".format(archive_name, release_path))
+        # Extracting the archive to the desired folder without .tgz extension
+        release_folder = "/data/web_static/releases/{}/".format(archive_name)
+        run("mkdir -p {}".format(release_folder))
+        run("tar -xzf /tmp/{}.tgz -C {}".format(archive_name, release_folder))
 
-        # Delete the archive from the server
+        # Delete the archive with .tgz extension from the server
         run("rm /tmp/{}.tgz".format(archive_name))
 
-        # Move files from 'web_static' subdirectory to release folder
-        run("mv {}/web_static/* {}/"
-            .format(release_path.rstrip('/'), release_path.rstrip('/')))
-
-        # Remove the 'web_static' subdirectory
-        run("rm -rf {}/web_static".format(release_path))
+        # Move files from extracted subdirectory to release folder
+        extracted_folder = "{}web_static".format(release_folder)
+        run("mv {}/* {}".format(extracted_folder, release_folder))
 
         # Remove the old symbolic link
         run("rm -rf /data/web_static/current")
 
         # Create a new symbolic link
-        run("ln -s {} /data/web_static/current".format(release_path))
+        run("ln -s {} /data/web_static/current".format(release_folder))
 
         # Print the "New version deployed!" message
         print("New version deployed!")
