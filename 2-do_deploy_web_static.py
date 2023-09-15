@@ -23,25 +23,32 @@ def do_deploy(archive_path):
     if not os.path.exists(archive_path):
         return False
 
-    # Get the base name of the archive
-    archive_name = os.path.basename(archive_path)
+    # Getting the base name of the archive without the file extension
+    archive_name = os.path.splitext(os.path.basename(archive_path))[0]
 
-    # Upload the archive to the remote server's /tmp/ directory
-    put(archive_path, "/tmp/{}".format(archive_name))
+    # Uploading the archive to the remote server's /tmp/ directory
+    put(archive_path, "/tmp/{}.tgz".format(archive_name))
 
-    # Extract the archive to the desired folder
-    run("mkdir -p /data/web_static/releases/the_archive/")
-    run("tar -xzf /tmp/{} -C /data/web_static/releases/the_archive/"
-        .format(archive_name))
+    # Extracting the archive to the desired folder
+    release_path = "/data/web_static/releases/{}/".format(archive_name)
+    run("mkdir -p {}".format(release_path))
+    run("tar -xzf /tmp/{}.tgz -C {}".format(archive_name, release_path))
 
-    # Delete the archive from the server
-    run("rm /tmp/{}".format(archive_name))
+    # Deleting the archive from the server
+    run("rm /tmp/{}.tgz".format(archive_name))
 
-    # Remove the old symbolic link
+    # Move files from 'web_static' subdirectory to release folder
+    run("mv {}/web_static/* {}/"
+        .format(release_path.rstrip('/'), release_path.rstrip('/')))
+
+    # Removing the 'web_static' subdirectory
+    run("rm -rf {}/web_static".format(release_path))
+
+    # Removing the old symbolic link
     run("rm -rf /data/web_static/current")
 
-    # Create a new symbolic link
-    run("ln -s /data/web_static/releases/the_archive/ \
-        /data/web_static/current")
+    # Creating a new symbolic link
+    run("ln -s {} /data/web_static/current".format(release_path))
 
-    return True
+    # Printing the "New version deployed!" message
+    print("New version deployed!")
