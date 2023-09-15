@@ -25,10 +25,10 @@ def do_deploy(archive_path):
 
     try:
         # Getting the base name of the archive without the file extension
-        archive_name = os.path.splitext(os.path.basename(archive_path))[0]
+        archive_name = os.path.basename(archive_path)
 
         # Upload the archive to the remote server's /tmp/ directory
-        put(archive_path, "/tmp/{}.tgz".format(archive_name))
+        put(archive_path, "/tmp/{}".format(archive_name))
 
         # Extract the archive to the desired folder
         release_path = "/data/web_static/releases/{}/".format(archive_name)
