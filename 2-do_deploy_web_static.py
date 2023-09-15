@@ -3,7 +3,6 @@
 # Using the do_deploy function
 
 import os
-import tarfile
 from fabric.api import *
 from sys import argv
 
@@ -15,35 +14,34 @@ env.hosts = ["34.229.189.80", "18.204.11.87"]
 env.user = argv[-1]
 
 # Setting the password to my servers
-env.password = "~/.ssh/school"
+env.key_filename = "~/.ssh/school"
 
 
 def do_deploy(archive_path):
-    """ function that distributes the archive to my web-servers """
-    # Checking if the file at the path archive_path doesn’t exist
+    """Function that distributes the archive to web servers"""
+
     if not os.path.exists(archive_path):
         return False
-    else:
-        # Uploading the archive to the /tmp/ directory of the web server
-        with lcd("/tmp"):
-            put(archive_path)
-        """ Uncompressing the archive to the folder on the web server """
-        # Getting only the file from the path
-        filename = os.path.basename(archive_path)
 
-        # Opening the file and extracting it to the desired folder
-        file = tarfile.open(filename)
-        file.extractall("/data/web_static/releases/the_archive")
+    # Get the base name of the archive
+    archive_name = os.path.basename(archive_path)
 
-        # Joining path and deleting the archive from the web server
-        complete_path = os.path.join("/tmp", archive_path)
-        local("rm -rf complete_path")
+    # Upload the archive to the remote server's /tmp/ directory
+    put(archive_path, "/tmp/{}".format(archive_name))
 
-        # Deleting the symbolic link from the server
-        local("unlink /data/web_static/current")
+    # Extract the archive to the desired folder
+    run("mkdir -p /data/web_static/releases/the_archive/")
+    run("tar -xzf /tmp/{} -C /data/web_static/releases/the_archive/"
+        .format(archive_name))
 
-        # Creating the new symbolic Link
-        local("ln -s /data/web_static/current \
-        data/web_static/releases/the_archive")
+    # Delete the archive from the server
+    run("rm /tmp/{}".format(archive_name))
 
-        return True
+    # Remove the old symbolic link
+    run("rm -rf /data/web_static/current")
+
+    # Create a new symbolic link
+    run("ln -s /data/web_static/releases/the_archive/ \
+        /data/web_static/current")
+
+    return True
