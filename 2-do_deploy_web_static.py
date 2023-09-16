@@ -27,26 +27,29 @@ def do_deploy(archive_path):
         # Getting the base name of the archive
         archive_name = os.path.basename(archive_path)
 
-        # Uploading the archive to the remote server's /tmp/ directory
-        put(archive_path, "/tmp/{}.tgz".format(archive_name))
+        # Upload the archive to the remote server's /tmp/ directory
+        put(archive_path, "/tmp/{}".format(archive_name))
 
-        # Extracting the archive to the desired folder without .tgz extension
-        release_folder = "/data/web_static/releases/{}/".format(archive_name)
-        run("mkdir -p {}".format(release_folder))
-        run("tar -xzf /tmp/{}.tgz -C {}".format(archive_name, release_folder))
+        # Extracting the archive to the /data/web_static/releases/ directory
+        release_folder = "/data/web_static/releases/"
+        run("mkdir -p {}/{}"
+            .format(release_folder.rstrip('/'), archive_name[:-4]))
+        run("tar -xzf /tmp/{} -C {}{}"
+            .format(archive_name, release_folder, archive_name[:-4]))
 
-        # Delete the archive with .tgz extension from the server
-        run("rm /tmp/{}.tgz".format(archive_name))
+        # Delete the archive from the server
+        run("rm /tmp/{}".format(archive_name))
 
-        # Move files from extracted subdirectory to release folder
-        extracted_folder = "{}web_static".format(release_folder)
-        run("mv {}/* {}".format(extracted_folder, release_folder))
+        # Create a new folder for the release
+        new_release_folder = "{}/{}".format(release_folder, archive_name[:-4])
+        run("mv {}/web_static/* {}"
+            .format(release_folder.rstrip('/'), new_release_folder))
 
         # Remove the old symbolic link
         run("rm -rf /data/web_static/current")
 
         # Create a new symbolic link
-        run("ln -s {} /data/web_static/current".format(release_folder))
+        run("ln -s {} /data/web_static/current".format(new_release_folder))
 
         # Print the "New version deployed!" message
         print("New version deployed!")
