@@ -39,6 +39,7 @@ def do_pack():
 
     return archive_path if os.path.exists(archive_path) else None
 
+
 def do_deploy(archive_path):
     """Function that distributes the archive to web servers"""
 
@@ -87,6 +88,7 @@ def do_deploy(archive_path):
         # Handle any exceptions and return False
         print("Error: {}".format(e))
         return False
+
 
 def deploy():
     """Function to deploy the archive to web servers"""
