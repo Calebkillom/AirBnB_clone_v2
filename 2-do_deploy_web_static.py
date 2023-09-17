@@ -40,10 +40,14 @@ def do_deploy(archive_path):
         # Delete the archive from the server
         run("rm /tmp/{}".format(archive_name))
 
-        # Create a new folder for the release
-        new_release_folder = "{}/{}".format(release_folder, archive_name[:-4])
-        run("mv {}/web_static/* {}"
-            .format(release_folder.rstrip('/'), new_release_folder))
+        # Create a new folder for the release without the extra slash
+        new_release_folder = "{}/{}".format(release_folder.rstrip('/'), archive_name[:-4])
+
+        # Use the shell argument to allow wildcard expansion
+        run("mv {}/web_static/* {}/"
+            .format(release_folder.rstrip('/'), \
+                    new_release_folder), shell=True)
+
 
         # Remove the old symbolic link
         run("rm -rf /data/web_static/current")
