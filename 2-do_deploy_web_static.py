@@ -39,7 +39,8 @@ def do_deploy(archive_path):
         run("mkdir -p {}/web_static".format(new_release_folder))
 
         # Extract the archive directly into the destination directory
-        run("tar -xzf /tmp/{} -C {}/web_static".format(archive_name, new_release_folder))
+        run("tar -xzf /tmp/{} -C {}/web_static"
+            .format(archive_name, new_release_folder))
 
         # Delete the archive from the server
         run("rm /tmp/{}".format(archive_name))
@@ -48,7 +49,8 @@ def do_deploy(archive_path):
         run("rm -rf /data/web_static/current")
 
         # Move the contents to the correct location
-        run("mv {}/web_static/* {}/".format(new_release_folder, new_release_folder))
+        run("mv {}/web_static/* {}/"
+            .format(new_release_folder, new_release_folder))
 
         # Create a new symbolic link
         run("ln -s {} /data/web_static/current".format(new_release_folder))
