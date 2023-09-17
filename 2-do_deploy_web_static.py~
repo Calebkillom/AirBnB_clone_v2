@@ -35,20 +35,20 @@ def do_deploy(archive_path):
         release_folder = "/data/web_static/releases/"
         new_release_folder = "{}{}".format(release_folder, archive_name[:-4])
 
-        # Create the destination directory if it doesn't exist
-        run("mkdir -p {}/web_static".format(new_release_folder))
-
-        # Extract the archive directly into the destination directory
-        run("tar -xzf /tmp/{} -C {}/web_static".format(archive_name, new_release_folder))
+        run("mkdir -p {}".format(new_release_folder))
+        run("tar -xzf /tmp/{} -C {}".format(archive_name, new_release_folder))
 
         # Delete the archive from the server
         run("rm /tmp/{}".format(archive_name))
 
+        # checking if the source directory exists.
+        run("ls -l /data/web_static/releases/web_static_20230916200243/web_static/")
+
+        # Move contents to the new release folder
+        run("mv {}/web_static/* {}/".format(new_release_folder, new_release_folder))
+
         # Remove the old symbolic link
         run("rm -rf /data/web_static/current")
-
-        # Move the contents to the correct location
-        run("mv {}/web_static/* {}/".format(new_release_folder, new_release_folder))
 
         # Create a new symbolic link
         run("ln -s {} /data/web_static/current".format(new_release_folder))
