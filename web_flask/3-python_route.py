@@ -17,7 +17,7 @@ def dis_hbnb():
 
 
 @app.route("/c/<text>", strict_slashes=False)
- @app.route("/c/", strict_slashes=False)
+@app.route("/c/", strict_slashes=False)
 def display_c(text="is cool"):
     """function that displays C followed by value of text variable."""
     text = text.replace('_', ' ')
